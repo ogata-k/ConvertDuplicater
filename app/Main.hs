@@ -1,4 +1,5 @@
 module Main where
+import CnvAndDup
 
 main :: IO ()
-main = putStrLn "ConvertDuplicater"
+main = cnvdup
