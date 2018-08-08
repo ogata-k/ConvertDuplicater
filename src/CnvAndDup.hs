@@ -33,7 +33,7 @@ readIntOver minI = do
         Right i -> if (minI <= i)
             then (return i)
             else putStrLn "入力が範囲外です。" >> (readIntOver minI)
--- TODO 範囲指定と高さ幅指定のリストの入力関数
+
 convert2IntList :: [[String]] -> Either String [[Int]]
 convert2IntList ssList = if isAllRight (map (map (readEither :: String -> Either String Int)) ssList)
                             then Right (map (map read) ssList)
@@ -74,7 +74,6 @@ readListRange h w minI maxI = do
                             Right result -> return result
 
 -- 変換と合成
--- TODO 変換と合成用の関数
 -- 正しい範囲指定で使われると仮定する。minI <= n <= maxI
 converter :: Int -> Int -> DataList -> [DataList] -> DataList
 converter minI maxI target = compose . convert target
@@ -128,4 +127,4 @@ cnvdup = do
                 return converted
             ) (return initList) [1 .. countCnv]
     putStrLn "すべての変換を終了しました。"
-    -- 画像にして吐き出したり保存したり、などの後処理。
+    -- TODO 画像にして吐き出したり保存したり、などの処理。
