@@ -7,8 +7,7 @@ module Image where
 import Codec.Picture
 import Control.Monad
 import Control.Monad.ST
-import System.FilePath (replaceExtension)
-import System.Directory (doesDirectoryExist)
+import System.Directory (createDirectoryIfMissing)
 import Data.Char (isDigit)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
@@ -28,15 +27,12 @@ makeDummyImg = ImageRGB8 (generateImage originalFnc 2400 1200)
 -- 使用可能な拡張子をpngだけにしてタイムスタンプ.pngを吐き出して保存するようにする
 getTimePngFilePath :: IO FilePath
 getTimePngFilePath = (++ ".png") . filter isDigit . iso8601Show <$> (utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime) 
-savePngImageWithTStmp :: FilePath -> DynamicImage -> IO (String, FilePath, Bool)  -- Bool is success or false
-savePngImageWithTStmp fpath img = do
-                                    isDir <- doesDirectoryExist fpath
-                                    if isDir 
-                                    then do
-                                        resPath <- (fpath ++) <$> getTimePngFilePath 
-                                        savePngImage resPath img 
-                                        return ("保存に成功しました。", resPath, True)
-                                    else return ("指定したディレクトリの指定が間違っているか存在しないディレクトリをしています。", fpath, False)
+savePngImageWithTStmp :: DynamicImage -> IO FilePath
+savePngImageWithTStmp img = do
+                                createDirectoryIfMissing False  ".\\work"
+                                resPath <- (".\\work\\" ++) <$> getTimePngFilePath 
+                                savePngImage resPath img 
+                                return resPath
 
 -- 画像への変換 注:使用可能な色数を指定させて変換できるようにすること
 
