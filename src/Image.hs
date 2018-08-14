@@ -24,6 +24,9 @@ makeDummyImg = ImageRGB8 (generateImage originalFnc 2400 1200)
                 in PixelRGB8 (s q) (s r) (s (q + r + 30))
 
 -- 使用可能な色の指定方法（グレー、R系統、G系統、B系統）
+getColorMagni :: Int -> Int -> Int
+getColorMagni minI maxI = undefined
+
 -- 使用可能な拡張子をpngだけにしてタイムスタンプ.pngを吐き出して保存するようにする
 getTimePngFilePath :: IO FilePath
 getTimePngFilePath = (++ ".png") . filter isDigit . iso8601Show <$> (utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime) 
