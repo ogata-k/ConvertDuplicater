@@ -21,6 +21,10 @@ description:         Please see the README on GitHub at <https://github.com/ogat
 
 dependencies:
 - base >= 4.7 && < 5
+- JuicyPixels
+- repa
+- filepath
+- time >= 1.9
 
 library:
   source-dirs: src
