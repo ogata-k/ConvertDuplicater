@@ -3,19 +3,31 @@
 
 module Image where
 
+
 import Codec.Picture
 import Control.Monad
 import Control.Monad.ST
 import System.FilePath (replaceExtension)
+import System.Directory (doesDirectoryExist)
 import Data.Char (isDigit)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 import Data.Time.LocalTime (getCurrentTimeZone, utcToLocalTime)
 -- import qualified Codec.Picture.Types as M
 
--- g—p‰Â”\‚ÈF‚Ìw’è•û–@iƒOƒŒ[ARŒn“AGŒn“ABŒn“j
--- g—p‰Â”\‚ÈŠg’£q‚ğpng‚¾‚¯‚É‚µ‚Äƒ^ƒCƒ€ƒXƒ^ƒ“ƒv.png‚ğ“f‚«o‚µ‚Ä•Û‘¶‚·‚é‚æ‚¤‚É‚·‚é
+-- ä½¿ç”¨å¯èƒ½ãªè‰²ã®æŒ‡å®šæ–¹æ³•ï¼ˆã‚°ãƒ¬ãƒ¼ã€Rç³»çµ±ã€Gç³»çµ±ã€Bç³»çµ±ï¼‰
+-- ä½¿ç”¨å¯èƒ½ãªæ‹¡å¼µå­ã‚’pngã ã‘ã«ã—ã¦ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—.pngã‚’åãå‡ºã—ã¦ä¿å­˜ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 getTimePngFilePath :: IO FilePath
 getTimePngFilePath = (++ ".png") . filter isDigit . iso8601Show <$> (utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime) 
+savePngImageWithTStmp :: FilePath -> DynamicImage -> IO (String, FilePath, Bool)  -- Bool is success or false
+savePngImageWithTStmp fpath img = do
+                                    isDir <- doesDirectoryExist fpath
+                                    if isDir 
+                                    then do
+                                        resPath <- (fpath ++) <$> getTimePngFilePath 
+                                        savePngImage resPath img 
+                                        return ("ä¿å­˜ã«æˆåŠŸã—ã¾ã—ãŸã€‚", resPath, True)
+                                    else return ("æŒ‡å®šã—ãŸãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®æŒ‡å®šãŒé–“é•ã£ã¦ã„ã‚‹ã‹å­˜åœ¨ã—ãªã„ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ã—ã¦ã„ã¾ã™ã€‚", fpath, False)
 
--- ‰æ‘œ‚Ö‚Ì•ÏŠ· ’:g—p‰Â”\‚ÈF”‚ğw’è‚³‚¹‚Ä•ÏŠ·‚Å‚«‚é‚æ‚¤‚É‚·‚é‚±‚Æ
+-- ç”»åƒã¸ã®å¤‰æ› æ³¨:ä½¿ç”¨å¯èƒ½ãªè‰²æ•°ã‚’æŒ‡å®šã•ã›ã¦å¤‰æ›ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã“ã¨
+

@@ -63,4 +63,5 @@ extra-deps: ["time-1.9.2"]
 # extra-lib-dirs: [/path/to/dir]
 #
 # Allow a newer minor version of GHC than the snapshot specifies
+allow-newer: true
 # compiler-check: newer-minor

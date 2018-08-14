@@ -25,6 +25,7 @@ dependencies:
 - repa
 - filepath
 - time >= 1.9
+- directory
 
 library:
   source-dirs: src
