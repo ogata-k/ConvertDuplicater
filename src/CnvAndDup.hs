@@ -4,7 +4,7 @@ module CnvAndDup(
 import Data.List (all, transpose)
 import Text.Read (readEither)
 import Control.Monad
-
+import Image
 
 -- このプログラムは基本cnvdupで使用する関数に正しい引数の指定をするものとする。そのため各関数での場合分けは極力少なくする。
 
@@ -12,8 +12,22 @@ import Control.Monad
 type DataList = [[Int]]
 showDataList :: DataList -> String
 showDataList d = concatMap ((++ "\n") . unwords .(map show)) d
+getHeight :: DataList -> Int
+getHeight = length
+getWidth :: DataList -> Int
+getWidth = length . head
 
+data ImageType = Gray | Red | Green | Blue deriving (Read)
 -- データ入力
+readImageType :: IO ImageType
+readImageType = do
+                    putStr "グレイスケール（Gray）、赤系統（Red）、緑系統（Green）、青系統（Blue） >> "
+                    s <- getLine
+                    case (readEither s) of
+                        Left _ -> putStrLn "入力が正しい指定ではありません。" >> readImageType
+                        Right t -> return t
+
+
 readIntRange :: Int -> Int -> IO Int
 readIntRange minI maxI = do
     putStr $ (show minI) ++ "以上" ++ (show maxI) ++ "以下の整数を入力してください。 >> "
@@ -75,8 +89,8 @@ readListRange h w minI maxI = do
 
 -- 変換と合成
 -- 正しい範囲指定で使われると仮定する。minI <= n <= maxI
-converter :: Int -> Int -> DataList -> [DataList] -> DataList
-converter minI maxI target = compose . convert target
+converter :: Int -> Int -> [DataList] -> DataList -> DataList
+converter minI maxI targetList target = compose $ convert target targetList
     where
         getCnvData :: Int -> [DataList] -> DataList
         getCnvData n datas = datas !! (n - minI)
@@ -85,13 +99,13 @@ converter minI maxI target = compose . convert target
         compose :: [[DataList]] -> DataList
         compose = map concat . concatMap transpose
 
-convertRep :: Int -> Int -> Int -> DataList -> [DataList] -> DataList
-convertRep n minI maxI target lst
+convertRep :: Int -> Int -> Int -> [DataList] -> DataList -> DataList
+convertRep n minI maxI lst target
     | n == 0 = target
-    | n > 0 = convertRep (n - 1) minI maxI (converter minI maxI target lst) lst
+    | n > 0 = convertRep (n - 1) minI maxI lst (converter minI maxI lst target)
 
 -- main
-cnvdup :: IO (DataList)  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
+cnvdup :: IO ()  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
 cnvdup = do
     putStrLn "\n最初に使用可能な整数を決定します。"
     putStrLn "使用する最小の整数を入力してください。"
@@ -116,21 +130,26 @@ cnvdup = do
     targetList <- sequence targetList'
     putStrLn "変換回数を入力してください。"
     countCnv <- readIntOver 0
-    putStrLn "入力お疲れさまでした。"
-    putStrLn "\n変換を開始します。"
-    putStrLn "変換を適用する前の初期データです。"
-    putStrLn (showDataList initList)
     result <- if countCnv < 1
             then (return initList)
-            else foldl (\target' n -> do
+            else foldl (\target' n -> id $! do
                 target <- target'
-                putStrLn ("\n" ++ (show n) ++ "回目の変換を実行しています。")
-                let converted = converter minI maxI target targetList
-                putStrLn "変換が終了しました。"
-                putStrLn ((show n) ++ "回変換を適用した後のデータです。")
-                putStrLn (showDataList converted)
+                let converted = converter minI maxI targetList target
                 return converted
             ) (return initList) [1 .. countCnv]
-    putStrLn "すべての変換を終了しました。"
-    return result
-    -- TODO 画像にして吐き出したり保存したり、などの処理。
+    putStrLn "\nここから変換後の処理に移ります。"
+    let magni = getColorMagni minI maxI
+    let h = getHeight result
+    let w = getWidth result
+    putStrLn "変換後のデータに対して画像としての保存方法を入力してください。"
+    typ <- readImageType
+    let dImg = case typ of
+                        Gray -> fromGrayImage $ generateFromList w h minI maxI (toGray minI magni) result   
+                        Red -> fromColorImage $ generateFromList w h minI maxI (toRed minI magni) result
+                        Green -> fromColorImage $ generateFromList w h minI maxI (toGreen minI magni) result
+                        Blue -> fromColorImage $ generateFromList w h minI maxI (toBlue minI magni) result
+    putStrLn "以上で入力は終了です。"
+    putStrLn "\n変換と保存を開始します。時間がかかるので保存の終了まで少々お待ちください。" 
+    file <- savePngImageWithTStmp dImg
+    putStrLn $ file ++ "に保存しました。"
+    putStrLn "以上で終了です。"

@@ -2,7 +2,8 @@
 {-# LANGUAGE TypeOperators   #-}
 
 module Image (
-      toGray
+      getColorMagni
+    , toGray
     , toRed
     , toGreen
     , toBlue
@@ -38,11 +39,11 @@ makeDummyImg = ImageRGB8 (generateImage originalFnc 2400 1200)
 getColorMagni :: Int -> Int -> Word8  -- 色の指定範囲から0を起点とした255への範囲を作る倍率を作成
 getColorMagni minI maxI = fromIntegral $ floor (255.0 / fromIntegral (abs (maxI - minI)))  
 toPixel8 :: Int -> Word8 -> Int -> Pixel8  -- 0が起点ではないのでminIだけ平行移動させて正規化している
-toPixel8 minI magni target = (fromIntegral (target - minI)) * magni
+toPixel8 minI magni target = 255 - (fromIntegral (target - minI)) * magni
 toGray = toPixel8
-toRed minI magni target = let r = toPixel8 minI magni target in PixelRGB8 r 0 0
-toGreen minI magni target = let g = toPixel8 minI magni target in PixelRGB8 0 g 0
-toBlue minI magni target = let b = toPixel8 minI magni target in PixelRGB8 0 0 b
+toRed minI magni target = let r = toPixel8 minI magni target in PixelRGB8 r 255 255
+toGreen minI magni target = let g = toPixel8 minI magni target in PixelRGB8 255 g 255
+toBlue minI magni target = let b = toPixel8 minI magni target in PixelRGB8 255 255 b
 getColorIndex :: Pixel a => (Int -> a) -> Int -> Int -> [a] -- 使用可能な色のインデックス
 getColorIndex cnv minI maxI = map cnv [minI .. maxI]
 
@@ -50,7 +51,7 @@ getColorIndex cnv minI maxI = map cnv [minI .. maxI]
 -- この関数はいちいち値を習得しているから重いかも
 generateFromList :: Pixel a =>
                     Int -> Int -> Int -> Int -> (Int -> a) -> [[Int]] -> Image a
-generateFromList w h minI maxI cnv lst = generateImage (\h' w' -> colorIndex !! ( lst !! h' !! w')) w h
+generateFromList w h minI maxI cnv lst = generateImage (\w' h' -> colorIndex !! ( lst !! h' !! w')) w h
                     where
                         colorIndex = getColorIndex cnv minI maxI
 
