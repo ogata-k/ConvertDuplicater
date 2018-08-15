@@ -88,8 +88,9 @@ converter minI maxI target = compose . convert target
 -- main
 cnvdup :: IO ()  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
 cnvdup = do
-    putStrLn "\n最初に使用可能な整数を決定します。使用可能な整数は0以上入力数値以下となります。"
-    let minI' = 0
+    putStrLn "\n最初に使用可能な整数を決定します。"
+    putStrLn "使用する最小の整数を入力してください。"
+    minI' <- readIntOver 0
     putStrLn "使用する最大の整数を入力してください。"
     maxI' <- readIntOver 0
     let minI = minimum [minI', maxI']
