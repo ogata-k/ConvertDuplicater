@@ -85,6 +85,11 @@ converter minI maxI target = compose . convert target
         compose :: [[DataList]] -> DataList
         compose = map concat . concatMap transpose
 
+convertRep :: Int -> Int -> Int -> DataList -> [DataList] -> DataList
+convertRep n minI maxI target lst
+    | n == 0 = target
+    | n > 0 = convertRep (n - 1) minI maxI (converter minI maxI target lst) lst
+
 -- main
 cnvdup :: IO (DataList)  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
 cnvdup = do
