@@ -8,6 +8,7 @@ import Codec.Picture
 import Control.Monad
 import Control.Monad.ST
 import System.Directory (createDirectoryIfMissing)
+import Data.List ((!!))
 import Data.Word (Word8)
 import Data.Char (isDigit)
 import Data.Time.Clock (getCurrentTime)
@@ -35,6 +36,23 @@ toGreen minI magni target = let g = toPixel8 minI magni target in PixelRGB8 0 g 
 toBlue minI magni target = let b = toPixel8 minI magni target in PixelRGB8 0 0 b
 getColorIndex :: Pixel a => (Int -> a) -> Int -> Int -> [a] -- 使用可能な色のインデックス
 getColorIndex cnv minI maxI = map cnv [minI .. maxI]
+
+-- 画像への変換
+-- この関数はいちいち値を習得しているから重いかも
+generateFromList :: Pixel a =>
+                    Int -> Int -> Int -> Int -> (Int -> a) -> [[Int]] -> Image a
+generateFromList w h minI maxI cnv lst = generateImage (\h' w' -> colorIndex !! ( lst !! h' !! w')) w h
+                    where
+                        colorIndex = getColorIndex cnv minI maxI
+
+-- 画像のデータ形式
+fromGrayImage :: Image Pixel8 -> DynamicImage
+fromGrayImage img = ImageY8 img
+fromColorImage :: Image PixelRGB8 -> DynamicImage
+fromColorImage img = ImageRGB8 img
+
+
+
 -- 使用可能な拡張子をpngだけにしてタイムスタンプ.pngを吐き出して保存するようにする
 getTimePngFilePath :: IO FilePath
 getTimePngFilePath = (++ ".png") . filter isDigit . iso8601Show <$> (utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime) 
@@ -45,5 +63,4 @@ savePngImageWithTStmp img = do
                                 savePngImage resPath img 
                                 return resPath
 
--- 画像への変換
 

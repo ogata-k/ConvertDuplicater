@@ -86,7 +86,7 @@ converter minI maxI target = compose . convert target
         compose = map concat . concatMap transpose
 
 -- main
-cnvdup :: IO ()  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
+cnvdup :: IO (DataList)  -- 画像への変換などは別モジュールへ？上の変換でもいいかも
 cnvdup = do
     putStrLn "\n最初に使用可能な整数を決定します。"
     putStrLn "使用する最小の整数を入力してください。"
@@ -127,4 +127,5 @@ cnvdup = do
                 return converted
             ) (return initList) [1 .. countCnv]
     putStrLn "すべての変換を終了しました。"
+    return result
     -- TODO 画像にして吐き出したり保存したり、などの処理。
