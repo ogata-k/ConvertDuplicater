@@ -1,7 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators   #-}
 
-module Image where
+module Image (
+      toGray
+    , toRed
+    , toGreen
+    , toBlue
+    , generateFromList
+    , fromGrayImage
+    , fromColorImage
+    , savePngImageWithTStmp
+)where
 
 
 import Codec.Picture
